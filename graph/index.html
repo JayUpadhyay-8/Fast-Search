@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+	<title>Graph</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="graph.js"></script>
+</head>
+<body>
+	<div id="graph" style="width:1400px; height:900px;">
+		<script type="text/canvas">
+			function setup(canvas) {
+				canvas.size(1400, 900);
+				canvas.fps = 30;
+				g = new Graph(canvas.element, 6);
+				var n = {
+					"en.wikipedia.org": {radius:36.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"indiatoday.in": {radius:6.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"myvotemyindia.in": {radius:12.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"alchetron.com": {radius:24.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"gilabs.in": {radius:18.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"tr-ex.me": {radius:18.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"wishusucess.com": {radius:12.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"4to40.com": {radius:6.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"geni.com": {radius:6.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"themanagmentguru.blogspot.com": {radius:6.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"quora.com": {radius:6.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0},
+					"hindvedian.in": {radius:6.0, fill:"rgba(32640,32640,0,0.10)", stroke:"rgba(0,0,0,0.50)", strokewidth:6.0}
+				};
+				var e = [
+					["en.wikipedia.org", "indiatoday.in", {length:1006.00}],
+					["myvotemyindia.in", "alchetron.com", {length:1004.00, strokewidth:2.00}],
+					["gilabs.in", "tr-ex.me", {length:1003.00}],
+					["wishusucess.com", "4to40.com", {length:1002.00}],
+					["geni.com", "themanagmentguru.blogspot.com", {length:1001.00}]
+				];
+				for (var id in n) {
+					g.addNode(id, n[id]);
+				}
+				for (var i=0; i < e.length; i++) {
+					var n1 = g.nodeset[e[i][0]];
+					var n2 = g.nodeset[e[i][1]];
+					g.addEdge(n1, n2, e[i][2]);
+				}
+				g.layout.k = 4.0; // Force constant (= edge length).
+				g.layout.force = 0.01; // Repulsive strength.
+				g.layout.repulsion = 50; // Repulsive radius.
+				g.eigenvectorCentrality();
+				g.betweennessCentrality();
+				g.degreeCentrality();
+				// Apply Node.weight to Node.radius.
+				for (var i=0; i < g.nodes.length; i++) {
+					var n = g.nodes[i];
+					n.radius = n.radius + n.radius * n.weight;
+				}
+				// Apply Edge.length (leaves get shorter edges).
+				for (var i=0; i < g.nodes.length; i++) {
+					var e = g.nodes[i].edges();
+					if (e.length == 1) {
+						e[0].length *= 0.2;
+					}
+				}
+			}
+			function draw(canvas) {
+				if (g.layout.iterations <= 500) {
+					canvas.clear();
+					//shadow();
+					stroke(0);
+					fill(0,0);
+					g.update(2);
+					g.draw(false, false);
+				}
+				g.drag(canvas.mouse);
+			}
+		</script>
+	</div>
+</body>
+</html>
